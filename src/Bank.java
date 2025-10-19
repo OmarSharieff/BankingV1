@@ -146,9 +146,13 @@ public class Bank {
     private boolean depositToAccount(String accountNumber, double amount) {
         if (loggedInClient != null) {
             Account account = findAccountByNumber(loggedInClient, accountNumber);
-            account.deposit(amount);
-            return true;
+            if (account != null) {
+                return account.deposit(amount);
+            }
+            System.out.println("Account does not exists!");
+            return false;
         }
+        System.out.println("Unauthorized client!");
         return false;
     }
 }
