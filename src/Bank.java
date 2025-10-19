@@ -1,47 +1,154 @@
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-class Bank {
+public class Bank {
+    private Client loggedInClient;
+    private Map<Client, List<Account>> clientAccountMap;
 
-    Client loggedInClient = new Client();
-    Account loggedInAccount = new Account();
-    // key-value paring to keep track of clientId and list of accounts that a client has
-    HashMap<Integer,List<Account>> clientAccountMap = new HashMap<>();
-
-    // Each Bank must have atleast one client and one account
-    Bank(Client loggedInClient, Account loggedInAccount) {
-        this.loggedInClient = loggedInClient;
-        this.loggedInAccount = loggedInAccount;
+    // constructor
+    public Bank() {
+        // instantiate an empty HashMap when bank object is created so that its not null and is ready to use
+        this.clientAccountMap = new HashMap<>();
+        // since no client is logged in when the bank is created it is set to null
+        this.loggedInClient = null;
     }
 
-    //all methods of Bank class
+    /* login method algorithm
+    * step1: iterates through the keys (Clients) in HashMap
+    * step2: validate the client id and pin with the arguments passed
+    * step3: if true, then set loggedInClient to client (return true)
+    * step4: otherwise, return false
+    * */
+    public boolean login(int id, int pin) {
+        for (Client client : clientAccountMap.keySet()) {
+            if (client.getID() == id && client.pinMatch(pin)) {
+                loggedInClient = client;
+                System.out.println("Login successful!");
+                return true;
+            }
+        }
+        System.out.println("Invalid ID or PIN.");
+        return false;
+    }
 
-    // checks credentials and logs them in
-    boolean login(int clientID, String PIN) {
-        if ((clientID == this.loggedInClient.getClientId()) && (PIN.equals(this.loggedInClient.getPIN()))){
+    /* logout method algorithm
+    * step1: check if client is already logged in i.e, (loggedInClient != null)
+    * step2: if true, then set loggedInClient to null
+    * step3: return true (logged out successfully)
+    * step4: otherwise return false
+    * */
+    public boolean logout() {
+        if (loggedInClient != null) {
+            loggedInClient = null;
+            System.out.println("Logged out successfully.");
             return true;
+        }
+        return false;
+    }
+
+    /* addClient method algorithm
+    * step1: create a new client object with a given clientID and pin
+    * step2: check if that client does not exist in clientAccountMap
+    * step3: if true, then put that new client object in the clientAccountMap with an empty list for client's accounts
+    * step4: if false, return false
+    * */
+    public boolean addClient(int clientID, int pin) {
+        Client newClient = new Client(clientID, pin);
+        if (!clientAccountMap.containsKey(newClient)) {
+            clientAccountMap.put(newClient, new ArrayList<>()); //(since the client is just created, newClient won't be having any account to begin with. Thus, an empty ArrayList)
+            return true;
+        }
+        System.out.println("Client already exists!");
+        return false;
+    }
+
+    /* removeClient method algorithm
+    * step1: if client exists, only then remove the loggedInClient from the clientAccountMap
+    * step2: set loggedInClient to null (return true)
+    * step3: otherwise return false
+    * */
+    public boolean removeClient() {
+        if (loggedInClient != null) {
+            clientAccountMap.remove(loggedInClient);
+            loggedInClient = null;
+            return true;
+        }
+        return false;
+    }
+
+    /* addAccount method algorithm
+    * step1: check if the loggedInClient exists
+    * step2: get all accounts of the loggedInClient
+    * step3: add the newly created account to the accounts list
+    * */
+    public boolean addAccount(String accountNumber) {
+        if (loggedInClient != null) {
+            List<Account> accounts = clientAccountMap.get(loggedInClient);
+            accounts.add(new Account(accountNumber, 0.0));
+            return true;
+        }
+        return false;
+    }
+
+    /* removeAccount method algorithm
+    * step1: check if loggedInClient exists
+    * step2: get all the accounts of the loggedInClient
+    * step3: remove the account which matches 'accountNumber' (return true)
+    * step4: otherwise, return false
+    * */
+    public boolean removeAccount(String accountNumber) {
+        if (loggedInClient != null) {
+            List<Account> accounts = clientAccountMap.get(loggedInClient);
+            return accounts.removeIf(account -> account.getAccountNumber().equals(accountNumber));
+        }
+        System.out.println("Account does not exist!");
+        return false;
+    }
+
+    /* showAccounts method algorithm
+    * step1: check if loggedInClient exists
+    * step2: get all the accounts of the loggedInClient and print them all
+    * step3: print "No client is logged in"
+    * */
+    public void showAccounts() {
+        if (loggedInClient != null) {
+            List<Account> accounts = clientAccountMap.get(loggedInClient);
+            System.out.println("Accounts for Client ID: " + loggedInClient.getID());
+            for (Account acc : accounts) {
+                acc.getOverview();
+            }
         } else {
-            return false;
+            System.out.println("No client is logged in!");
         }
     }
 
-    // logout method logs out those users which are already logged in
-    boolean logout() {
-        if (this.login(this.loggedInClient.getClientId(),this.loggedInClient.getPIN())) {
-            System.out.println("You have logged out");
+    public boolean transfer(Account sourceAccount, Account destinationAccount, double amount) {
+        if (sourceAccount.withdraw(amount)) {
+            destinationAccount.deposit(amount);
             return true;
-        } else {
-            System.out.println("Invalid request");
-            return false;
         }
+        return false;
     }
 
-    //method to add account
-    boolean addAccount(String acNumber) {
-        // write code here
-        return true;
+    // helper method to find an account by number
+    private Account findAccountByNumber(Client client, String accountNumber) {
+        List<Account> accounts = clientAccountMap.get(client);
+        if (accounts != null) {
+            for(Account account: accounts ) {
+                if(account.getAccountNumber().equals(accountNumber)) {
+                    return account;
+                }
+            }
+        }
+        return null;
     }
 
-
-
+    // helper method to deposit to a particular account
+    private boolean depositToAccount(String accountNumber, double amount) {
+        if (loggedInClient != null) {
+            Account account = findAccountByNumber(loggedInClient, accountNumber);
+            account.deposit(amount);
+            return true;
+        }
+        return false;
+    }
 }
