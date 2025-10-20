@@ -31,8 +31,8 @@ public class BankingV1 {
 
         while (true) {
             System.out.print("Do you want to add an account? (Y/n): ");
-            String choice = scanner.nextLine();
-            if (choice.equalsIgnoreCase("y")) {
+            char choice = scanner.next().charAt(0);
+            if (choice == 'Y' || choice == 'y' || choice == ' ') {
                 String randomAccountNumber = randomAccountNumberGenerator();
                 bank.addAccount(randomAccountNumber);
                 System.out.printf("Account %s has been successfully added for client.%n", randomAccountNumber);
@@ -41,8 +41,14 @@ public class BankingV1 {
             }
         }
 
-        System.out.println("\nSelect your account:");
         List<Account> accounts = bank.getClientAccountMap().get(bank.getLoggedInClient());
+
+        // if there are no accounts created then we simply exit the program
+        if (accounts.isEmpty()) {
+            System.out.println("There were no accounts created!");
+            System.exit(1);
+        }
+        System.out.println("\nSelect your account:");
         for (int i = 0; i < accounts.size(); i++) {
             System.out.println((i + 1) + ". " + accounts.get(i).getAccountNumber());
         }
@@ -57,13 +63,15 @@ public class BankingV1 {
         System.out.printf("Deposit of %.2f is successful. Current balance: %.2f%n",
                 amount, chosenAccount.getBalance());
 
+        //consume the newline leftover
+        scanner.nextLine();
 
 
         // Show all accounts for the logged-in client
         bank.showAccounts();
 
         // Code to transfer amount
-        System.out.println("Want to make a transfer? (Y/n)");
+        System.out.print("Want to make a transfer? (Y/n): ");
         String transferPrompt = scanner.nextLine();
         if (transferPrompt.equalsIgnoreCase("y")) {
             System.out.println("Please enter the account number of recipient: ");
@@ -76,11 +84,36 @@ public class BankingV1 {
             Account recepientAccount = bank.findAccountByNumber(bank.getLoggedInClient(),recipientAccNum);
             if (bank.transfer(chosenAccount,recepientAccount,transferAmount)) {
                 System.out.println("Amount has been transferred successfully!");
-                System.out.printf("Available balance after transfer: %f", chosenAccount.getBalance());
+                System.out.printf("Available balance after transfer: %.2f\n", chosenAccount.getBalance());
             } else {
                 System.out.println("Amount could not be transferred!");
             };
         }
+
+        bank.showAccounts();
+
+        System.out.print("Do you want to remove an account: (Y/n): ");
+        char removeAccUserInput = scanner.next().charAt(0);
+        if(removeAccUserInput == 'Y' || removeAccUserInput == 'y' || removeAccUserInput == ' ') {
+            System.out.println("\nSelect your account:");
+            for (int i = 0; i < accounts.size(); i++) {
+                System.out.println((i + 1) + ". " + accounts.get(i).getAccountNumber());
+            }
+            System.out.print("Enter the corresponding number of your account (Ex: 1, 2, 3...): ");
+            int accountPosition1 = scanner.nextInt();
+            Account chosenAccount1 = accounts.get(accountPosition - 1);
+            bank.removeAccount(chosenAccount1.getAccountNumber());
+            System.out.println("Account has been successfully removed");
+            bank.showAccounts();
+        } else {
+            System.out.println("No account removed");
+            System.exit(0);
+        }
+
+        //method for removing client
+        bank.removeClient();
+
+
 
         // Logout
         bank.logout();
