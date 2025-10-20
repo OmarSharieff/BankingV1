@@ -29,13 +29,40 @@ public class BankingV1 {
             return;
         }
 
+        // keep creating accounts till client stops
         while (true) {
             System.out.print("Do you want to add an account? (Y/n): ");
             char choice = scanner.next().charAt(0);
             if (choice == 'Y' || choice == 'y' || choice == ' ') {
                 String randomAccountNumber = randomAccountNumberGenerator();
-                bank.addAccount(randomAccountNumber);
-                System.out.printf("Account %s has been successfully added for client.%n", randomAccountNumber);
+
+                System.out.println("Select account type: ");
+                System.out.println("1. Green (Standard): No overdraft allowed");
+                System.out.println("2. Black (Premium): Up to -4000");
+                System.out.println("3. Gold (Unlimited): Unlimited overdraft");
+                System.out.print("Enter choice (1/2/3): ");
+                int typeChoice = scanner.nextInt();
+
+                AccountType selectedType;
+
+                switch (typeChoice) {
+                    case 1:
+                        selectedType = AccountType.GREEN;
+                        break;
+                    case 2:
+                        selectedType = AccountType.BLACK;
+                        break;
+                    case 3:
+                        selectedType = AccountType.GOLD;
+                        break;
+                    default:
+                        selectedType = AccountType.GREEN;
+                        break;
+                }
+
+                bank.addAccount(randomAccountNumber, selectedType);
+                System.out.printf("Account %s of type %s has been successfully added for client.%n",
+                        randomAccountNumber, selectedType);
             } else {
                 break;
             }

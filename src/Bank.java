@@ -90,13 +90,14 @@ public class Bank {
     * step2: get all accounts of the loggedInClient
     * step3: add the newly created account to the accounts list
     * */
-    public boolean addAccount(String accountNumber) {
-        if (loggedInClient != null) {
-            List<Account> accounts = clientAccountMap.get(loggedInClient);
-            accounts.add(new Account(accountNumber, 0.0));
-            return true;
+    public boolean addAccount(String accountNumber, AccountType accountType) {
+        if (loggedInClient == null) {
+            System.out.println("No client is logged in. Can't create the account!");
+            return false;
         }
-        return false;
+        Account newAccount = new Account(accountNumber, accountType);
+        clientAccountMap.get(loggedInClient).add(newAccount); // adding newAccount to the Accounts list
+        return true;
     }
 
     /* removeAccount method algorithm
