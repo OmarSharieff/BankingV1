@@ -1,24 +1,68 @@
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+
 public class BankingV1 {
+
+    private static String randomAccountNumberGenerator() {
+        Random random = new Random();
+        return "ACC" + Math.abs(random.nextInt(10000)); // Avoid negative numbers
+    }
+
     public static void main(String[] args) {
         Bank bank = new Bank();
+        Scanner scanner = new Scanner(System.in);
 
         // Add clients
         bank.addClient(101, 1234);
         bank.addClient(102, 5678);
 
         // Login as a client
-        bank.login(101, 1234);
+        System.out.print("Please enter your ID: ");
+        int loginID = scanner.nextInt();
+        System.out.print("Please enter your PIN to login: ");
+        int loginPIN = scanner.nextInt();
+        scanner.nextLine(); // consume leftover newline
 
-        // Add accounts
-        bank.addAccount("ACC1001");
-        bank.addAccount("ACC1002");
+        if (!bank.login(loginID, loginPIN)) {
+            System.out.println("Login failed. Exiting...");
+            return;
+        }
 
-        // Deposit money in client 101
+        while (true) {
+            System.out.print("Do you want to add an account? (Y/n): ");
+            String choice = scanner.nextLine();
+            if (choice.equalsIgnoreCase("y")) {
+                String randomAccountNumber = randomAccountNumberGenerator();
+                bank.addAccount(randomAccountNumber);
+                System.out.printf("Account %s has been successfully added for client.%n", randomAccountNumber);
+            } else {
+                break;
+            }
+        }
 
-        // Show accounts
+        System.out.println("\nSelect your account:");
+        List<Account> accounts = bank.getClientAccountMap().get(bank.getLoggedInClient());
+        for (int i = 0; i < accounts.size(); i++) {
+            System.out.println((i + 1) + ". " + accounts.get(i).getAccountNumber());
+        }
+
+        System.out.print("Enter the corresponding number of your account (Ex: 1, 2, 3...): ");
+        int accountPosition = scanner.nextInt();
+        Account chosenAccount = accounts.get(accountPosition - 1);
+
+        System.out.print("Enter amount to deposit: ");
+        double amount = scanner.nextDouble();
+        chosenAccount.deposit(amount);
+        System.out.printf("Deposit of %.2f is successful. Current balance: %.2f%n",
+                amount, chosenAccount.getBalance());
+
+        // Show all accounts for the logged-in client
         bank.showAccounts();
 
         // Logout
         bank.logout();
+
+        scanner.close();
     }
 }

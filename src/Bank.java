@@ -4,6 +4,16 @@ public class Bank {
     private Client loggedInClient;
     private Map<Client, List<Account>> clientAccountMap;
 
+    // getter method for loggedInClient
+    public Client getLoggedInClient() {
+        return loggedInClient;
+    }
+
+    // getter method for clientAccountMap
+    public Map<Client, List<Account>> getClientAccountMap() {
+        return clientAccountMap;
+    }
+
     // constructor
     public Bank() {
         // instantiate an empty HashMap when bank object is created so that its not null and is ready to use
@@ -143,7 +153,7 @@ public class Bank {
     }
 
     // helper method to deposit to a particular account
-    private boolean depositToAccount(String accountNumber, double amount) {
+    public boolean depositToAccount(String accountNumber, double amount) {
         if (loggedInClient != null) {
             Account account = findAccountByNumber(loggedInClient, accountNumber);
             if (account != null) {
