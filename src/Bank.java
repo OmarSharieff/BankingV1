@@ -140,7 +140,7 @@ public class Bank {
     }
 
     // helper method to find an account by number
-    private Account findAccountByNumber(Client client, String accountNumber) {
+    public Account findAccountByNumber(Client client, String accountNumber) {
         List<Account> accounts = clientAccountMap.get(client);
         if (accounts != null) {
             for(Account account: accounts ) {

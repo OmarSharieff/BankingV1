@@ -57,8 +57,30 @@ public class BankingV1 {
         System.out.printf("Deposit of %.2f is successful. Current balance: %.2f%n",
                 amount, chosenAccount.getBalance());
 
+
+
         // Show all accounts for the logged-in client
         bank.showAccounts();
+
+        // Code to transfer amount
+        System.out.println("Want to make a transfer? (Y/n)");
+        String transferPrompt = scanner.nextLine();
+        if (transferPrompt.equalsIgnoreCase("y")) {
+            System.out.println("Please enter the account number of recipient: ");
+            String recipientAccNum = scanner.nextLine();
+
+            System.out.println("How much would you like to transfer? (Enter Amount):");
+            double transferAmount = scanner.nextDouble();
+
+            // Getting recipient account by utilizing the helper method in bank class
+            Account recepientAccount = bank.findAccountByNumber(bank.getLoggedInClient(),recipientAccNum);
+            if (bank.transfer(chosenAccount,recepientAccount,transferAmount)) {
+                System.out.println("Amount has been transferred successfully!");
+                System.out.printf("Available balance after transfer: %f", chosenAccount.getBalance());
+            } else {
+                System.out.println("Amount could not be transferred!");
+            };
+        }
 
         // Logout
         bank.logout();
